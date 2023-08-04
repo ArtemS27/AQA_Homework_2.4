@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.appibank.data.UserData;
-import ru.netology.appibank.operations.Balance;
-import ru.netology.appibank.operations.Transfer;
-import ru.netology.appibank.page.Login;
-import ru.netology.appibank.page.Verification;
+import ru.netology.appibank.page.*;
 
 import static com.codeborne.selenide.Selenide.*;
 
@@ -20,98 +17,96 @@ public class AppIbankTest {
 
     @Test
     public void shouldLogIn(){
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfo();
-        var verification = new Verification();
+        var verification = new VerificationPage();
         var verificationCode = UserData.getVerificationCode();
         login.validLogin(authInfo);
         verification.validVerificationCode(verificationCode);
-
-        $("[data-test-id=dashboard]").shouldBe(Condition.visible);
     }
 
     @Test
     public void shouldThrowNotificationIfLoginInvalid(){
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfoWithInvalidLogin();
         login.validLogin(authInfo);
 
-        $("[data-test-id=error-notification]").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+        login.findErrorMessage("Ошибка! Неверно указан логин или пароль");
     }
 
     @Test
     public void shouldThrowNotificationIfPasswordInvalid(){
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfoWithInvalidPassword();
         login.validLogin(authInfo);
 
-        $("[data-test-id=error-notification]").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+        login.findErrorMessage("Ошибка! Неверно указан логин или пароль");
     }
 
     @Test
     public void shouldThrowNotificationIfVerificationCodeInvalid() {
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfo();
-        var verification = new Verification();
+        var verification = new VerificationPage();
         var verificationCode = UserData.getInvalidVerificationCode();
         login.validLogin(authInfo);
         verification.validVerificationCode(verificationCode);
 
-        $("[data-test-id=error-notification]").shouldHave(Condition.text("Ошибка! Неверно указан код! Попробуйте ещё раз."));
+        login.findErrorMessage("Ошибка! Неверно указан код! Попробуйте ещё раз.");
     }
 
     @Test
     public void shouldTransferMoneyFromFirstCardToSecond(){
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfo();
-        var verification = new Verification();
+        var verification = new VerificationPage();
         var verificationCode = UserData.getVerificationCode();
         login.validLogin(authInfo);
         verification.validVerificationCode(verificationCode);
-        var balanceActual = new Balance();
+        var balanceActual = new DashboardPage();
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
-        var transfer = new Transfer();
+        var transfer = new TransferPage();
         transfer.transferFromFirstCardToSecond();
-        var balanceExpected = new Balance();
-        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance-Integer.parseInt(UserData.transferAmount("500").getTransferAmount()));
-        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance+Integer.parseInt(UserData.transferAmount("500").getTransferAmount()));
+        var balanceExpected = new DashboardPage();
+        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance-transfer.getTransferAmount());
+        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance+transfer.getTransferAmount());
     }
 
     @Test
     public void shouldTransferMoneyFromSecondCardToFirst(){
-        var login = new Login();
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfo();
-        var verification = new Verification();
+        var verification = new VerificationPage();
         var verificationCode = UserData.getVerificationCode();
         login.validLogin(authInfo);
         verification.validVerificationCode(verificationCode);
-        var balanceActual = new Balance();
+        var balanceActual = new DashboardPage();
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
-        var transfer = new Transfer();
+        var transfer = new TransferPage();
         transfer.transferFromSecondCardToFirst();
-        var balanceExpected = new Balance();
-        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance+Integer.parseInt(UserData.transferAmount("500").getTransferAmount()));
-        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance-Integer.parseInt(UserData.transferAmount("500").getTransferAmount()));
+        var balanceExpected = new DashboardPage();
+        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance+transfer.getTransferAmount());
+        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance-transfer.getTransferAmount());
     }
 
     @Test
-    public void shouldThrowToMainPageIfTooManyAttempts(){
-        var login = new Login();
+    public void shouldThrowMessageIfAmountMoteThanBalance(){
+        var login = new LoginPage();
         var authInfo = UserData.getAuthInfo();
-        var verification = new Verification();
-        var verificationCode = UserData.getInvalidVerificationCode();
+        var verification = new VerificationPage();
+        var verificationCode = UserData.getVerificationCode();
         login.validLogin(authInfo);
         verification.validVerificationCode(verificationCode);
-        verification.cleanVerificationCodeField();
-        verification.validVerificationCode(verificationCode);
-        verification.cleanVerificationCodeField();
-        verification.validVerificationCode(verificationCode);
-        verification.cleanVerificationCodeField();
-        verification.validVerificationCode(verificationCode);
-
-        $("[data-test-id=error-notification]").shouldHave(Condition.text("Превышено количество попыток ввода кода!"));
-        $(".heading").shouldBe(Condition.visible);
+        var balanceActual = new DashboardPage();
+        int firstCardBalance = balanceActual.getFirstCardBalance();
+        int secondCardBalance = balanceActual.getSecondCardBalance();
+        var transfer = new TransferPage();
+        transfer.makeInvalidTransfer();
+        login.findErrorMessage("Выполнена попытка превода суммы, превышающей остаток на карте списания");
+        var balanceExpected = new DashboardPage();
+        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance);
+        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance);
     }
 }
