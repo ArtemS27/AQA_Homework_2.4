@@ -67,6 +67,8 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
+        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
+        transfer.setCardNumber(UserData.getFirstCardNumber().getNumber());
         transfer.transferFromFirstCardToSecond();
         var balanceExpected = new DashboardPage();
         Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance-transfer.getTransferAmount());
@@ -85,6 +87,8 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
+        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
+        transfer.setCardNumber(UserData.getSecondCardNumber().getNumber());
         transfer.transferFromSecondCardToFirst();
         var balanceExpected = new DashboardPage();
         Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance+transfer.getTransferAmount());
@@ -103,6 +107,8 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
+        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
+        transfer.setCardNumber(UserData.getFirstCardNumber().getNumber());
         transfer.makeInvalidTransfer();
         login.findErrorMessage("Выполнена попытка превода суммы, превышающей остаток на карте списания");
         var balanceExpected = new DashboardPage();
