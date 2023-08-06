@@ -1,6 +1,5 @@
 package ru.netology.appibank;
 
-import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,12 +66,11 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
-        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
-        transfer.setCardNumber(UserData.getFirstCardNumber().getNumber());
-        transfer.transferFromFirstCardToSecond();
+        String transferAmount = UserData.generateValidAmount(balanceActual.getFirstCardBalance());
+        transfer.transferFromFirstCardToSecond(transferAmount, UserData.getFirstCardNumber().getNumber());
         var balanceExpected = new DashboardPage();
-        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance-transfer.getTransferAmount());
-        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance+transfer.getTransferAmount());
+        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance-Integer.parseInt(transferAmount));
+        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance+Integer.parseInt(transferAmount));
     }
 
     @Test
@@ -87,12 +85,11 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
-        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
-        transfer.setCardNumber(UserData.getSecondCardNumber().getNumber());
-        transfer.transferFromSecondCardToFirst();
+        String transferAmount = UserData.generateValidAmount(balanceActual.getSecondCardBalance());
+        transfer.transferFromSecondCardToFirst(transferAmount, UserData.getSecondCardNumber().getNumber());
         var balanceExpected = new DashboardPage();
-        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance+transfer.getTransferAmount());
-        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance-transfer.getTransferAmount());
+        Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance+Integer.parseInt(transferAmount));
+        Assertions.assertEquals(balanceExpected.getSecondCardBalance(), secondCardBalance-Integer.parseInt(transferAmount));
     }
 
     @Test
@@ -107,9 +104,7 @@ public class AppIbankTest {
         int firstCardBalance = balanceActual.getFirstCardBalance();
         int secondCardBalance = balanceActual.getSecondCardBalance();
         var transfer = new TransferPage();
-        transfer.setTransferAmount(UserData.generateValidAmount(balanceActual.getFirstCardBalance()));
-        transfer.setCardNumber(UserData.getFirstCardNumber().getNumber());
-        transfer.makeInvalidTransfer();
+        transfer.transferFromFirstCardToSecond(UserData.generateInvalidAmount(balanceActual.getFirstCardBalance()), UserData.getFirstCardNumber().getNumber());
         login.findErrorMessage("Выполнена попытка превода суммы, превышающей остаток на карте списания");
         var balanceExpected = new DashboardPage();
         Assertions.assertEquals(balanceExpected.getFirstCardBalance(), firstCardBalance);

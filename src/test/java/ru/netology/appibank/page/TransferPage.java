@@ -9,43 +9,21 @@ public class TransferPage {
     private final SelenideElement amountField = $("[data-test-id=amount] input");
     private final SelenideElement numberField = $("[data-test-id=from] input");
     private final SelenideElement transferButton = $("[data-test-id=action-transfer]");
-    private String transferAmount;
-    private String cardNumber;
-    public void transferFromSecondCardToFirst(){
+
+    public void makeTransfer(String transferAmount, String cardNumber){
+        amountField.setValue(transferAmount);
+        numberField.setValue(cardNumber);
+        transferButton.click();
+    }
+    public void transferFromSecondCardToFirst(String transferAmount, String cardNumber){
         var dashboard = new DashboardPage();
         dashboard.pushFirstCardButton();
-        amountField.setValue(transferAmount);
-        numberField.setValue(cardNumber);
-        transferButton.click();
+        makeTransfer(transferAmount, cardNumber);
     }
 
-    public void transferFromFirstCardToSecond() {
+    public void transferFromFirstCardToSecond(String transferAmount, String cardNumber) {
         var dashboard = new DashboardPage();
         dashboard.pushSecondCardButton();
-        amountField.setValue(transferAmount);
-        numberField.setValue(cardNumber);
-        transferButton.click();
-    }
-
-    public void makeInvalidTransfer() {
-        var dashboard = new DashboardPage();
-        dashboard.pushSecondCardButton();
-        amountField.setValue(transferAmount);
-        numberField.setValue(cardNumber);
-        transferButton.click();
-    }
-
-    public int getTransferAmount(){
-        return Integer.parseInt(transferAmount);
-    }
-
-    public String setTransferAmount(String amount){
-        transferAmount = amount;
-        return transferAmount;
-    }
-
-    public String setCardNumber(String num){
-        cardNumber = num;
-        return cardNumber;
+        makeTransfer(transferAmount, cardNumber);
     }
 }
