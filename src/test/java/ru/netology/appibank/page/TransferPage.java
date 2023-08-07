@@ -15,15 +15,4 @@ public class TransferPage {
         numberField.setValue(cardNumber);
         transferButton.click();
     }
-    public void transferFromSecondCardToFirst(String transferAmount, String cardNumber){
-        var dashboard = new DashboardPage();
-        dashboard.pushFirstCardButton();
-        makeTransfer(transferAmount, cardNumber);
-    }
-
-    public void transferFromFirstCardToSecond(String transferAmount, String cardNumber) {
-        var dashboard = new DashboardPage();
-        dashboard.pushSecondCardButton();
-        makeTransfer(transferAmount, cardNumber);
-    }
 }
